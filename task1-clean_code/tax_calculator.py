@@ -97,7 +97,10 @@ class TaxCalculator:
         self.health_insurance_tax = income * TaxRates.HEALTH_INSURANCE_RATE
         self.deductible_health_tax = income * TaxRates.DEDUCTIBLE_HEALTH_RATE
 
-    def print_report(self, data):
+
+class TaxReportPrinter:
+    @staticmethod
+    def print_report(data):
         print("Income ", data["base_income"])
         print("Social security tax: " + "{0:.2f}".format(data["retirement_tax"]))
         print("Health social security tax: " + "{0:.2f}".format(data["pension_tax"]))
@@ -140,7 +143,8 @@ def main():
 
     calculator = TaxCalculator(base_income, contract_type)
     result = calculator.calculate_summary()
-    calculator.print_report(result)
+    
+    TaxReportPrinter.print_report(result)
 
 
 if __name__ == '__main__':
