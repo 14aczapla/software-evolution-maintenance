@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from decimal import Decimal, ROUND_HALF_UP
 from enum import Enum
 
@@ -19,10 +20,66 @@ class TaxRates:
     DEFAULT_TAX_FREE_INCOME = Decimal("46.33")
 
 
+class Contract(ABC):
+    def __init__(self, name: str):
+        self.name = name
+
+    @abstractmethod
+    def calculate_deductible_expenses(self, social_security_base: Decimal) -> Decimal:
+        pass
+
+    @abstractmethod
+    def get_tax_free_income(self) -> Decimal:
+        pass
+
+    @abstractmethod
+    def calculate_tax_paid(self, tax_rate: Decimal, tax_free_income: Decimal) -> Decimal:
+        pass
+
+
+class EmploymentContract(Contract):
+    def __init__(self):
+        super().__init__("EMPLOYMENT")
+
+    def calculate_deductible_expenses(self, social_security_base: Decimal) -> Decimal:
+        return TaxRates.DEFAULT_EMPLOYMENT_EXPENSES
+
+    def get_tax_free_income(self) -> Decimal:
+        return TaxRates.DEFAULT_TAX_FREE_INCOME
+
+    def calculate_tax_paid(self, tax_rate: Decimal, tax_free_income: Decimal) -> Decimal:
+        return tax_rate - tax_free_income
+
+
+class CivilContract(Contract):
+    def __init__(self):
+        super().__init__("CIVIL")
+
+    def calculate_deductible_expenses(self, social_security_base: Decimal) -> Decimal:
+        return social_security_base * TaxRates.CIVIL_EXPENSE_RATE
+
+    def get_tax_free_income(self) -> Decimal:
+        return Decimal("0.00")
+
+    def calculate_tax_paid(self, tax_rate: Decimal, tax_free_income: Decimal) -> Decimal:
+        return tax_rate
+
+
+class ContractFactory:
+    @staticmethod
+    def create_contract(contract_type: str) -> Contract:
+        if contract_type == ContractType.EMPLOYMENT.value:
+            return EmploymentContract()
+        elif contract_type == ContractType.CIVIL.value:
+            return CivilContract()
+        else:
+            raise ValueError(f"Unknown contract type: {contract_type}")
+
+
 class TaxCalculator:
-    def __init__(self, base_income: Decimal, contract_type: str):
+    def __init__(self, base_income: Decimal, contract: Contract):
         self.base_income = base_income
-        self.contract_type = contract_type
+        self.contract = contract
         
         self.retirement_tax = Decimal("0.00")
         self.pension_tax = Decimal("0.00")
@@ -39,21 +96,14 @@ class TaxCalculator:
         social_security_base = self.calculate_income(self.base_income)
         self.calculate_other_taxes(social_security_base)
 
-        if self.contract_type == ContractType.EMPLOYMENT.value:
-            self.deductible_expenses = TaxRates.DEFAULT_EMPLOYMENT_EXPENSES
-            self.tax_free_income = TaxRates.DEFAULT_TAX_FREE_INCOME
-        else:
-            self.deductible_expenses = social_security_base * TaxRates.CIVIL_EXPENSE_RATE
-            self.tax_free_income = Decimal("0.00")
+        self.deductible_expenses = self.contract.calculate_deductible_expenses(social_security_base)
+        self.tax_free_income = self.contract.get_tax_free_income()
 
         taxable_income = social_security_base - self.deductible_expenses
         rounded_taxable_income = taxable_income.quantize(Decimal("1"), rounding=ROUND_HALF_UP)
         self.calculate_tax(rounded_taxable_income)
 
-        if self.contract_type == ContractType.EMPLOYMENT.value:
-            tax_paid = self.tax_rate - self.tax_free_income
-        else:
-            tax_paid = self.tax_rate
+        tax_paid = self.contract.calculate_tax_paid(self.tax_rate, self.tax_free_income)
 
         self.calculate_advance_tax()
         self.base_advance_tax = self.advance_tax.quantize(Decimal("1"), rounding=ROUND_HALF_UP)
@@ -64,7 +114,7 @@ class TaxCalculator:
 
         return {
             "base_income": self.base_income,
-            "contract_type": self.contract_type,
+            "contract_name": self.contract.name,
             "social_security_base": social_security_base,
             "retirement_tax": self.retirement_tax,
             "pension_tax": self.pension_tax,
@@ -113,7 +163,7 @@ class TaxReportPrinter:
         print("Income: ", data["taxable_income"], " rounded: " + "{:.0f}".format(data["rounded_taxable_income"]))
         print("Advance tax 18% = ", data["tax_rate"])
 
-        if data["contract_type"] == ContractType.EMPLOYMENT.value:
+        if data["contract_name"] == "EMPLOYMENT":
             print("Tax free income =", data["tax_free_income"])
             print("Reduced tax = " + "{:.2f}".format(data["tax_paid"]))
         else:
@@ -131,19 +181,15 @@ def main():
         if not contract_type_input:
             raise ValueError
         contract_type = contract_type_input[0]
+        
+        contract = ContractFactory.create_contract(contract_type)
     except Exception:
-        print("Incorrect input")
+        print("Incorrect input or unknown contract type.")
         return
 
-    if contract_type == ContractType.EMPLOYMENT.value:
-        print("EMPLOYMENT")
-    elif contract_type == ContractType.CIVIL.value:
-        print("CIVIL")
-    else:
-        print("Unknown type of contract.")
-        return
+    print(contract.name)
 
-    calculator = TaxCalculator(base_income, contract_type)
+    calculator = TaxCalculator(base_income, contract)
     result = calculator.calculate_summary()
     
     TaxReportPrinter.print_report(result)
