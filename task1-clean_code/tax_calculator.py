@@ -93,7 +93,7 @@ class TaxableIncomeResult:
 
 
 @dataclass(frozen=True)
-class CommonTaxCalculation:
+class TaxCalculation:
 
     base_income: Decimal
     social_security: SocialSecurityResult
@@ -108,17 +108,8 @@ class CommonTaxCalculation:
 
 
 @dataclass(frozen=True)
-class TaxReport:
-
-    base_income: Decimal
-    social_security: SocialSecurityResult
-    health_insurance: HealthInsuranceResult
-    taxable_income: TaxableIncomeResult
-    tax_before_deductions: Decimal
-    tax_after_tax_free_amount: Decimal
-    tax_advance: Decimal
-    rounded_tax_advance: Decimal
-    net_income: Decimal
+class TaxReport(ABC):
+    calculation: TaxCalculation
 
 
 @dataclass(frozen=True)
@@ -154,7 +145,7 @@ class ContractRules(ABC):
     @abstractmethod
     def create_report(
         self,
-        calculation: CommonTaxCalculation,
+        calculation: TaxCalculation,
     ) -> TaxReport:
         raise NotImplementedError
 
@@ -172,10 +163,10 @@ class EmploymentContractRules(ContractRules):
 
     def create_report(
         self,
-        calculation: CommonTaxCalculation,
+        calculation: TaxCalculation,
     ) -> EmploymentTaxReport:
         return EmploymentTaxReport(
-            **calculation.__dict__,
+            calculation=calculation,
             tax_free_income=self.tax_free_income,
         )
 
@@ -193,10 +184,10 @@ class CivilContractRules(ContractRules):
 
     def create_report(
         self,
-        calculation: CommonTaxCalculation,
+        calculation: TaxCalculation,
     ) -> CivilTaxReport:
         return CivilTaxReport(
-            **calculation.__dict__,
+            calculation=calculation,
             calculated_tax=calculation.tax_after_tax_free_amount,
         )
 
@@ -239,7 +230,7 @@ class TaxCalculator:
         )
         net_income = income - total_deductions
 
-        calculation = CommonTaxCalculation(
+        calculation = TaxCalculation(
             base_income=income,
             social_security=social_security,
             health_insurance=health_insurance,
@@ -304,16 +295,7 @@ class TaxCalculator:
             TaxRates.WHOLE_ZLOTY,
             rounding=ROUND_HALF_UP,
         )
-
-
-class TaxProcessor:
-
-    def __init__(self, calculator: TaxCalculator):
-        self._calculator = calculator
-
-    def process(self, input_data: InputData) -> TaxReport:
-        return self._calculator.calculate(input_data.base_income)
-
+    
 
 class TaxCalculatorFactory:
 
@@ -354,11 +336,12 @@ class TaxReportPresenter(ABC):
         raise NotImplementedError
 
     def _print_common_body(self, report: TaxReport) -> None:
-        social = report.social_security
-        health = report.health_insurance
-        taxable = report.taxable_income
+        calc = report.calculation
+        social = calc.social_security
+        health = calc.health_insurance
+        taxable = calc.taxable_income
 
-        print(f"Income: {self._money(report.base_income)}", file=self._output)
+        print(f"Income: {self._money(calc.base_income)}", file=self._output)
         print(
             f"Retirement contribution: "
             f"{self._money(social.retirement_contribution)}",
@@ -401,21 +384,22 @@ class TaxReportPresenter(ABC):
         )
         print(
             f"Tax before deductions (18%): "
-            f"{self._money(report.tax_before_deductions)}",
+            f"{self._money(calc.tax_before_deductions)}",
             file=self._output,
         )
 
     def _print_footer(self, report: TaxReport) -> None:
+        calc = report.calculation
         print(
-            f"Tax advance before rounding: {self._money(report.tax_advance)}",
+            f"Tax advance before rounding: {self._money(calc.tax_advance)}",
             file=self._output,
         )
         print(
-            f"Tax advance rounded: {report.rounded_tax_advance:.0f}",
+            f"Tax advance rounded: {calc.rounded_tax_advance:.0f}",
             file=self._output,
         )
         print(
-            f"\nNet income: {self._money(report.net_income)}",
+            f"\nNet income: {self._money(calc.net_income)}",
             file=self._output,
         )
 
@@ -438,7 +422,7 @@ class EmploymentTaxReportPresenter(TaxReportPresenter):
         )
         print(
             f"Tax after tax-free amount: "
-            f"{self._money(report.tax_after_tax_free_amount)}",
+            f"{self._money(report.calculation.tax_after_tax_free_amount)}",
             file=self._output,
         )
 
@@ -476,9 +460,9 @@ def main() -> None:
     try:
         input_data = InputHandler.collect_input()
         calculator = TaxCalculatorFactory.create(input_data.contract_type)
-        processor = TaxProcessor(calculator)
 
-        report = processor.process(input_data)
+        report = calculator.calculate(input_data.base_income)
+
         presenter = TaxReportPresenterFactory.create(report)
         presenter.print_report(report)
 
