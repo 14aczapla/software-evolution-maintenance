@@ -1,0 +1,50 @@
+$ C:\Users\kinga\maintainability-audit\.venv\Scripts\lint-imports.exe
+
+
+╔══╗─────────▶╔╗ ╔╗      ╔╗◀───┐
+╚╣╠╝◀─────┐  ╔╝╚╗║║────▶╔╝╚╗   │
+ ║║   ╔══╦══╦╩╗╔╝║║  ╔╦═╩╗╔╝╔═╦══╗
+ ║║╔══╣╔╗║╔╗║╔╣║ ║║ ╔╬╣╔╗║║ ║│║╔═╝
+╔╣╠╣║║║╚╝║╚╝║║║╚╗║╚═╝║║║║║╚╗║═╣║
+╚══╩╩╩╣╔═╩══╩╝╚═╝╚═══╩╩╝╚╩═╩╩═╩╝
+  └──▶║║                    ▲ 
+      ╚╝────────────────────┘
+
+Verbose mode.
+Building import graph (cache directory is .import_linter_cache)...
+Used cache meta file .import_linter_cache\confirmation.meta.json.
+Used cache meta file .import_linter_cache\zproject.meta.json.
+Used cache meta file .import_linter_cache\zerver.meta.json.
+Used cache meta file .import_linter_cache\corporate.meta.json.
+Used cache meta file .import_linter_cache\zilencer.meta.json.
+Used cache meta file .import_linter_cache\analytics.meta.json.
+Used cache data file .import_linter_cache\0da2c5c09f2e655762c77f01c1a5e9e0cc40f62e.data.json.
+Wrote data cache file .import_linter_cache\0da2c5c09f2e655762c77f01c1a5e9e0cc40f62e.data.json.
+Wrote meta cache file .import_linter_cache\confirmation.meta.json.
+Wrote meta cache file .import_linter_cache\zproject.meta.json.
+Wrote meta cache file .import_linter_cache\zerver.meta.json.
+Wrote meta cache file .import_linter_cache\corporate.meta.json.
+Wrote meta cache file .import_linter_cache\zilencer.meta.json.
+Wrote meta cache file .import_linter_cache\analytics.meta.json.
+Built graph in 0.520s.
+Checking webhooks must not import the presentation layer...
+Searching for import chains from zerver.webhooks to zerver.actions...
+Found 33 illegal chains in 0.002s.
+Searching for import chains from zerver.webhooks to zerver.views...
+Found 4 illegal chains in 0.001s.
+webhooks must not import the presentation layer BROKEN [0.007s]
+Checking zerver.lib (service layer) must not import views/actions...
+Searching for import chains from zerver.lib to zerver.actions...
+Found 54 illegal chains in 0.002s.
+Searching for import chains from zerver.lib to zerver.views...
+Found 5 illegal chains in 0.001s.
+zerver.lib (service layer) must not import views/actions BROKEN [0.009s]
+Checking models must not import views/actions (model layering)...
+Searching for import chains from zerver.models to zerver.actions...
+Found 6 illegal chains in 0.000s.
+Searching for import chains from zerver.models to zerver.views...
+Found 3 illegal chains in 0.000s.
+models must not import views/actions (model layering) BROKEN [0.009s]
+independent
+
+--- stderr ---

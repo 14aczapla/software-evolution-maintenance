@@ -1,0 +1,33 @@
+  pydeps_zerver.dot: exists, skipping
+  pydeps_zproject.dot: exists, skipping
+RUN: C:\Users\kinga\maintainability-audit\.venv\Scripts\lint-imports.exe --config C:\Users\kinga\maintainability-audit\zulip\.importlinter_audit.cfg --verbose ...
+  rc=1 stdout=2336B stderr=0B
+RUN: C:\Users\kinga\maintainability-audit\.venv\Scripts\python.exe C:\Users\kinga\maintainability-audit\output\tools\_pydriller_check.py ...
+  rc=0 stdout=321B stderr=0B
+Traceback (most recent call last):
+  File "C:\Users\kinga\maintainability-audit\scripts\toolchain_graphs.py", line 212, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\kinga\maintainability-audit\scripts\toolchain_graphs.py", line 179, in main
+    j2 = pd_py.merge(sub, on="file", how="inner")
+  File "C:\Users\kinga\maintainability-audit\.venv\Lib\site-packages\pandas\core\frame.py", line 16192, in merge
+    return merge(
+        self,
+    ...<10 lines>...
+        validate=validate,
+    )
+  File "C:\Users\kinga\maintainability-audit\.venv\Lib\site-packages\pandas\core\reshape\merge.py", line 391, in merge
+    op = _MergeOperation(
+        left_df,
+    ...<10 lines>...
+        validate=validate,
+    )
+  File "C:\Users\kinga\maintainability-audit\.venv\Lib\site-packages\pandas\core\reshape\merge.py", line 1014, in __init__
+    ) = self._get_merge_keys()
+        ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\kinga\maintainability-audit\.venv\Lib\site-packages\pandas\core\reshape\merge.py", line 1646, in _get_merge_keys
+    left_keys.append(left._get_label_or_level_values(lk))
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^
+  File "C:\Users\kinga\maintainability-audit\.venv\Lib\site-packages\pandas\core\generic.py", line 1708, in _get_label_or_level_values
+    raise KeyError(key)
+KeyError: 'file'

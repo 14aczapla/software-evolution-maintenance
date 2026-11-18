@@ -1,0 +1,184 @@
+== STATIC ==
+files all=1973 product=1798 sloc_all=329889 sloc_prod=173560
+functions=13384 classes=2920
+      cyclomatic  cognitive
+min          1.0        0.0
+50%          1.0        0.0
+mean         2.3        1.7
+75%          2.0        1.0
+max        368.0      955.0
+fn cog>=50: 19  cog>=100: 6  cyc>=30: 23
+
+TOP 10 FUNCTIONS BY COGNITIVE:
+                           file                 function  loc  cyclomatic  cognitive
+           zerver/lib/events.py              apply_event  857         368        955
+   zerver/views/registration.py      registration_helper  480          82        181
+           zerver/lib/events.py fetch_initial_state_data  557         124        172
+     zerver/lib/import_realm.py          do_import_realm  593          81        107
+          zerver/views/realm.py             update_realm  402          82        107
+ zerver/actions/message_send.py         do_send_messages  276          49        102
+ zerver/webhooks/stripe/view.py           topic_and_body  185          47         96
+ zerver/actions/message_edit.py        do_update_message  389          64         96
+        zerver/views/streams.py    update_stream_backend  197          58         79
+zerver/lib/markdown/__init__.py                      run  104          38         73
+
+DIT dist: {0: 1659, 1: 388, 2: 644, 3: 195, 4: 32, 5: 2}
+classes DIT>=3: 229
+
+TOP 10 CLASSES BY CBO:
+                      file                   class  loc  methods  dit  cbo
+zerver/lib/import_realm.py           S3Destination   10        2    1   56
+zerver/lib/import_realm.py        LocalDestination   14        2    1   56
+zerver/lib/import_realm.py       UploadDestination    6        1    0   55
+zerver/lib/import_realm.py              UploadPlan    7        0    0   54
+zerver/lib/import_realm.py    MessageImportContext    4        0    0   54
+zerver/lib/import_realm.py         SanitizedRecord    5        0    0   54
+      zerver/lib/export.py S3DownloadsProcessState    3        0    0   50
+      zerver/lib/export.py UserMessageProcessState    3        0    0   50
+      zerver/lib/export.py          MessagePartial    4        0    0   50
+      zerver/lib/export.py                  Config  159        2    0   50
+
+TOP 10 CLASSES BY LOC:
+                                   file                 class  loc  methods  dit  cbo
+         corporate/tests/test_stripe.py            StripeTest 4034       63    3   19
+            zerver/tests/test_events.py     NormalActionsTest 3981      138    3   39
+    zerver/tests/test_slack_importer.py         SlackImporter 3951       63    2   21
+     zerver/tests/test_message_fetch.py    GetOldMessagesTest 3693       79    2   23
+              zerver/tests/test_subs.py       StreamAdminTest 3676       73    2   22
+                corporate/lib/stripe.py        BillingSession 3603      102    0   44
+       zerver/tests/test_user_groups.py  UserGroupAPITestCase 3589       38    3   15
+zerver/tests/test_message_move_topic.py  MessageMoveTopicTest 3448       46    2   14
+zerver/migrations/0001_squashed_0569.py             Migration 3360        0    0    8
+     zerver/tests/test_import_export.py RealmImportExportTest 3113       42    3   49
+
+HALSTEAD: effort mean/median/max: 287.6 143.4 3455.6
+TOP 5 MODULES BY HALSTEAD EFFORT:
+                              file  n1   n2  volume  effort  difficulty
+zerver/tests/test_auth_backends.py  53 2064 23030.8  3455.6        0.15
+  zerver/tests/test_user_groups.py  34  605  5763.7  3036.3        0.54
+    corporate/tests/test_stripe.py  42  912  9194.1  2939.0        0.33
+         zerver/tests/test_subs.py  43 1256 13163.4  2716.0        0.21
+           corporate/lib/stripe.py  58 1400 14971.5  2679.5        0.18
+
+COUPLING: modules with in-repo imports: 846
+avg in-repo imports/module: 6.2  max: 63
+
+== SMELLS ==
+PYLINT TOP 15:
+                    symbol  count
+missing-function-docstring  10244
+              import-error   4944
+   missing-class-docstring   2755
+             line-too-long   2461
+              invalid-name   2002
+  missing-module-docstring   1830
+    too-few-public-methods   1485
+          use-dict-literal   1261
+           unused-argument   1205
+            duplicate-code    783
+             cyclic-import    524
+           too-many-locals    426
+        too-many-arguments    327
+        raise-missing-from    306
+   import-outside-toplevel    304
+
+RUFF BY RULE (top 15):
+   code  count
+ ARG001    645
+PLR0913    316
+PLR0915    267
+   C901    228
+ ARG002    221
+PLR2004    193
+PLR0917    165
+PLR0912    135
+
+GOD CLASSES: 104  TOP 10:
+                                   file                class  loc  methods  dit  cbo  god_score
+            zerver/tests/test_events.py    NormalActionsTest 3981      138    3   39  10.726250
+                corporate/lib/stripe.py       BillingSession 3603      102    0   44   8.753750
+     zerver/tests/test_message_fetch.py   GetOldMessagesTest 3693       79    2   23   7.907917
+         corporate/tests/test_stripe.py           StripeTest 4034       63    3   19   7.667500
+        zerver/webhooks/github/tests.py    GitHubWebhookTest  926      156    3    2   7.657500
+              zerver/tests/test_subs.py      StreamAdminTest 3676       73    2   22   7.636667
+             zerver/lib/test_classes.py   ZulipTestCaseMixin 2024      122    0   36   7.613333
+    zerver/tests/test_slack_importer.py        SlackImporter 3951       63    2   21   7.563750
+              zerver/tests/test_bots.py              BotTest 2347      101    2   12   7.142083
+zerver/tests/test_message_move_topic.py MessageMoveTopicTest 3448       46    2   14   6.226667
+
+LONG METHODS: 448  TOP 10:
+                           file                 function  loc  cyclomatic  cognitive
+           zerver/lib/events.py              apply_event  857         368        955
+   zerver/views/registration.py      registration_helper  480          82        181
+           zerver/lib/events.py fetch_initial_state_data  557         124        172
+          zerver/views/realm.py             update_realm  402          82        107
+     zerver/lib/import_realm.py          do_import_realm  593          81        107
+ zerver/actions/message_send.py         do_send_messages  276          49        102
+ zerver/webhooks/stripe/view.py           topic_and_body  185          47         96
+ zerver/actions/message_edit.py        do_update_message  389          64         96
+        zerver/views/streams.py    update_stream_backend  197          58         79
+zerver/lib/markdown/__init__.py                      run  104          38         73
+
+== EVOLUTION ==
+files with churn: 2019 (product: 1841), total commits in window: 10685
+TOP 10 PRODUCT FILES BY CHURN:
+                          file  n_commits  lines_added  lines_deleted  is_test
+    zerver/lib/integrations.py        135         2515           1267    False
+         zerver/lib/streams.py        116         3019            834    False
+     zerver/lib/event_types.py        115         2070            780    False
+       corporate/lib/stripe.py        114         7477           1259    False
+       zerver/views/streams.py        102         2118            620    False
+          zerver/lib/events.py         98         2743            400    False
+          zerver/lib/export.py         84         4096            807    False
+zerver/actions/message_edit.py         77         2874            844    False
+  zerver/views/registration.py         77         2717            599    False
+     zerver/actions/streams.py         76         2481            529    False
+
+files with >=5 distinct authors: 161  single-author product files: 1198
+TOP 10 FILES BY #AUTHORS:
+                          file  n_commits  n_authors       top_author  top_author_pct
+          zerver/lib/events.py         98         25 Prakhar Pratyush            17.3
+zerver/actions/message_send.py         70         25      Sahil Batra            17.1
+  zproject/default_settings.py         65         24  Mateusz Mandera            16.9
+              zproject/urls.py         52         23  Mateusz Mandera            13.5
+     zerver/lib/event_types.py        115         22     Evy Kassirer            37.4
+zerver/actions/message_edit.py         77         22      Sahil Batra            15.6
+        zerver/models/users.py         58         22      Sahil Batra            19.0
+     zerver/actions/streams.py         76         21      Sahil Batra            23.7
+         zerver/views/users.py         36         20       Tim Abbott            13.9
+       zerver/models/realms.py         67         20         Vector73            16.4
+
+TOP 10 AUTHORS (all files in scope):
+        author             email  n_commits first_commit last_commit
+  Aman Agrawal amanagr@zulip.com       1073   2024-11-18  2026-11-02
+Anders Kaseorg  anders@zulip.com        904   2024-11-15  2026-10-29
+ Alex Vandiver  alexmv@zulip.com        774   2024-11-22  2026-11-11
+   Sahil Batra   sahil@zulip.com        692   2024-11-15  2026-11-06
+  Karl Stolley    karl@zulip.com        617   2024-11-18  2026-11-10
+ Lauryn Menard  lauryn@zulip.com        615   2024-11-19  2026-11-12
+ Shubham Padia shubham@zulip.com        607   2024-11-16  2026-10-23
+   Alya Abbott    alya@zulip.com        505   2024-11-25  2026-07-21
+  Evy Kassirer     evy@zulip.com        464   2025-03-27  2026-11-11
+    Tim Abbott tabbott@zulip.com        442   2024-11-15  2026-09-06
+total authors: 277
+monthly commits: months=25 avg=427
+
+CO-CHANGE: raw pairs: 1406491  shared>=10: 251  shared>=20: 62
+TOP 10 CO-CHANGE PAIRS (product only):
+                      file_a                             file_b  shared_commits
+  zerver/lib/event_schema.py          zerver/lib/event_types.py              45
+       zerver/lib/streams.py            zerver/views/streams.py              43
+   zerver/actions/streams.py              zerver/lib/streams.py              39
+  zerver/lib/event_schema.py               zerver/lib/events.py              32
+       zerver/lib/streams.py    zerver/lib/subscription_info.py              31
+   zerver/actions/streams.py            zerver/views/streams.py              30
+       zerver/lib/streams.py           zerver/models/streams.py              30
+     zerver/models/realms.py              zerver/views/realm.py              29
+   zerver/lib/event_types.py               zerver/lib/events.py              28
+zproject/default_settings.py zproject/prod_settings_template.py              25
+
+== STAGE 2 SUMMARY ==
+hotspot score>0 files: 711
+hidden couples total: 137
+bus factor risks: 24
+bf single-author files: 14
