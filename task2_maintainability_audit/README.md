@@ -1,8 +1,9 @@
 # Maintainability Audit — Stage 1 (Zulip, Python)
 
 Stage 1 data collection for `zulip/zulip` (branch `main`): static metrics,
-code smells, and repository-evolution metrics, with every metric
-cross-validated against the recommended Python toolchain.
+code smells, repository-evolution metrics, and dependency/coupling analysis —
+with the recommended Python toolchain (lizard, radon, pylint, ruff, vulture,
+git log, Pydeps, Pyreverse, Import-linter).
 
 * **Report:** `REPORT_STAGE1.md` (read this first)
 * **Data:** `output/*.csv` (+ `output/charts/`), tool raw outputs in `output/tools/`
@@ -23,8 +24,10 @@ python -m venv .venv
 .venv\Scripts\python scripts\toolchain_graphs.py
 ```
 
-`toolchain_graphs.py` runs Pydeps/Pyreverse/Import-linter/PyDriller and is the
-slow step (PyDriller re-walks 10k commits).
+`toolchain_metrics.py` runs the recommended metric tools (radon, pygount,
+xenon, mccabe — raw outputs in `output/tools/`; `radon hal` is the Halstead
+source). `toolchain_graphs.py` runs Pydeps/Pyreverse/Import-linter (§5) and
+the PyDriller attempt, and is the slow step (PyDriller re-walks 10k commits).
 
 ## Main outputs
 
@@ -50,6 +53,6 @@ slow step (PyDriller re-walks 10k commits).
 * Test files are included in metrics but excluded from hotspot ranking.
 * `output/cochange_pairs.csv` (139 MB raw pair list) stays local and is not
   pushed; the derived `hidden_couples.csv` contains all flagged pairs.
-* PyDriller churn cross-check not completed: PyDriller 2.12's
+* PyDriller (2.12) could not be used for per-file churn — its
   `modified_files` exposes basenames only, not paths (library limitation;
-  the script is fixed for future runs). Churn numbers come from `git log`.
+  script fixed for future runs). Evolution metrics come from `git log`.

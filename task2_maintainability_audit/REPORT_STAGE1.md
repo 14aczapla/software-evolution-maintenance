@@ -8,12 +8,18 @@ All results: `output/*.csv` · reproduction: `README.md`.
 
 | Metric | Tool |
 |---|---|
-| SLOC, DIT, CBO | Python `tokenize`/`ast` |
+| SLOC, import graph | Python `tokenize`/`ast` (stdlib) |
 | Cyclomatic + cognitive complexity | **lizard** 1.26 (per function) |
 | Halstead (h1, h2, N1, N2, volume, effort, difficulty) | **radon hal** (per module) |
 | Smells | **pylint** 4, **ruff**, **vulture** |
-| Churn, ownership, co-change | **git log** CLI |
-| Cross-checks (§5) | Radon, Pygount, Xenon, mccabe (Flake8 C901 engine), Pydeps, Pyreverse, Import-linter |
+| Churn, ownership, co-change | **git log** CLI (10 685 commits) |
+| DIT, CBO | Python `ast` — class-level metrics not provided by the listed tools (see below) |
+| Dependency & coupling analysis (§5) | **pydeps**, **pyreverse**, **import-linter** |
+
+*Class-level DIT/CBO: Pydeps works on module imports, Pyreverse generates UML
+class diagrams, Import-linter enforces layering contracts — none of them emits
+class-level DIT/CBO numbers, so a small AST script computes them (in-repo class
+graph). The listed tools are used for exactly what they cover: §5.*
 
 Thresholds: *god class* = class LOC ≥ 400 and methods ≥ 12 · *long method* = LOC ≥ 80 or cognitive ≥ 40 · *hotspot* = min-max(log churn) × min-max(max cognitive), test files excluded · *hidden coupling* = pair with >70% shared commits in both directions, ≥5 each, no import edge.
 
@@ -64,20 +70,28 @@ Structural: **104 god classes** (e.g. `BillingSession`, `Config` in export.py), 
 | `zerver/actions/message_send.py` | 102 | 70 | 0.09 |
 | `zerver/views/realm.py` | 107 | 55 | 0.09 |
 
-## 5. Cross-validation with the recommended toolchain
+## 5. Dependency & Coupling Analysis (Pydeps · Pyreverse · Import-linter)
 
-Every metric above was re-computed with an independent tool from the recommended Python toolchain (`scripts/toolchain_metrics.py`, `scripts/toolchain_graphs.py`; raw outputs `output/tools/`, details `output/cross_validation.md`):
+* **Pydeps**: import graph of the six scopes → one merged `zerver` core closure
+  (766 views + 1 143 actions); `zilencer`, `confirmation`, `corporate` are
+  separate components (DOT: `output/tools/pydeps_zerver.dot`).
+* **Pyreverse**: UML class diagrams (DOT: `output/tools/pyreverse_*.dot`) —
+  the same coupled core at class level.
+* **Import-linter** — 3 forbidden layering contracts, **all BROKEN,
+  105 illegal chains**:
 
-| Metric | Cross-check | Result |
-|---|---|---|
-| SLOC | Radon `raw`, Pygount | r = 1.000 / 0.998 — identical ranking |
-| Cyclomatic | Radon `cc`, mccabe (Flake8 C901) | r = 0.994 (98.1% within ±2) / 0.963 |
-| CCN bands | Xenon | 340 vs 378 blocks at CCN ≥ 11 |
-| Halstead | token-based textbook formula | r = 0.42 — counting conventions differ; both kept |
-| Dependencies | Pydeps, Pyreverse | one merged `zerver` core closure (766 views + 1,143 actions) |
-| **Layering** | **Import-linter** (3 contracts) | **all BROKEN — 105 illegal chains** (lib→actions: 54, webhooks→views: 33, models→views: 6; zilencer/confirmation/corporate stay independent) |
+| Contract | Illegal chains |
+|---|---|
+| `zerver.lib` → `zerver.actions` | 54 |
+| `zerver.views.webhooks` → `zerver.views` | 33 |
+| `zerver.models` → `zerver.views` | 6 |
 
-The layering result is the strongest new finding: the intended layer separation is systematically violated (e.g. `zerver.lib` → `zerver.actions`), pointing at the same coupled `lib ↔ actions` core Pydeps shows and pylint's 524 cyclic imports flag.
+  `zilencer` / `confirmation` / `corporate` stay independent (0 cross-imports).
+
+The layering result is the strongest new finding: the intended layer separation
+is systematically violated (e.g. `zerver.lib` → `zerver.actions`), pointing at
+the same coupled `lib ↔ actions` core that Pydeps shows and pylint's 524 cyclic
+imports flag (§3).
 
 ## 6. Conclusions
 
@@ -86,4 +100,4 @@ The layering result is the strongest new finding: the intended layer separation 
 3. **Size/complexity**: medians are healthy; risk is concentrated in a short tail (top-10 functions, 104 god classes).
 4. **Process**: event + stream subsystems are the most tightly interwoven; `local.py`/`s3.py` lockstep is a shotgun-surgery target; 1,198 single-author files feed the Stage-2 bus-factor analysis.
 
-*Limitations: shallow clone (25 months); pylint without Zulip's runtime deps (import-error artifact); DIT/CBO ignore external Django bases; PyDriller churn cross-check not completed — PyDriller 2.12's `modified_files` exposes basenames only, not paths (library limitation; the script is fixed for future runs).*
+*Limitations: shallow clone (25 months); pylint without Zulip's runtime deps (import-error artifact); DIT/CBO ignore external Django bases; PyDriller run (2.12) could not be used for per-file churn — `modified_files` exposes basenames only, not paths (library limitation; script fixed for future runs), so evolution metrics come from `git log`.*
