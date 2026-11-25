@@ -1,9 +1,0 @@
-scope: ['zerver', 'zproject', 'zilencer', 'analytics', 'confirmation', 'corporate']
-python files (all): 1973, (non-test): 1707
-files_size.csv: 1973 rows
-functions_complexity.csv: 13384 rows
-modules_halstead_tokenbased.csv: 1842 rows
-modules_halstead.csv (radon hal): 1973 rows
-classes_metrics.csv: 2920 rows
-modules_coupling.csv: 846 rows
-DONE
